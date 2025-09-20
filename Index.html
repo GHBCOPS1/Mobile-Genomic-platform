@@ -1,0 +1,1790 @@
+index.<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Genomics Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #00ffc8;
+            --secondary-color: #667eea;
+            --accent-color: #764ba2;
+            --background-color: rgba(10, 15, 25, 0.95);
+            --text-color: white;
+            --panel-border: rgba(0, 255, 200, 0.3);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --error-color: #dc3545;
+            --info-color: #17a2b8;
+            --mobile-nav-height: 60px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0f19 0%, #1a1f35 50%, #2a3550 100%);
+            color: var(--text-color);
+            overflow-x: hidden;
+            padding-bottom: var(--mobile-nav-height);
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--mobile-nav-height);
+            background: var(--background-color);
+            border-top: 2px solid var(--panel-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.8rem;
+            padding: 8px;
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        /* Mobile Header */
+        .mobile-header {
+            background: var(--background-color);
+            padding: 15px;
+            border-bottom: 2px solid var(--panel-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 15px;
+        }
+
+        .panel {
+            background: var(--background-color);
+            border: 2px solid var(--panel-border);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .panel-title {
+            color: var(--primary-color);
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--panel-border);
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        /* Molecular Visualization */
+        #molecular-viewer {
+            width: 100%;
+            height: 200px;
+            background: radial-gradient(circle, #1a1a2e 0%, #16213e 100%);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .molecule-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 8px 12px;
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover, .control-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+        }
+
+        /* Analysis Grid */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.8em;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        /* Tabs */
+        .tab-container {
+            margin-top: 15px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid var(--panel-border);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-btn {
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            opacity: 0.7;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            opacity: 1;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab-content {
+            padding: 15px 0;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--panel-border);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 1em;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            width: 100%;
+        }
+
+        /* Authentication */
+        .auth-container {
+            background: var(--background-color);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid var(--panel-border);
+            margin: 20px;
+        }
+
+        .auth-title {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 20px var(--primary-color);
+        }
+
+        /* Real-time Indicators */
+        .real-time-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: var(--info-color);
+            font-size: 0.8em;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 255, 200, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        .notification.success {
+            background: var(--success-color);
+        }
+
+        .notification.error {
+            background: var(--error-color);
+        }
+
+        .notification.warning {
+            background: var(--warning-color);
+        }
+
+        .notification.info {
+            background: var(--info-color);
+        }
+
+        /* New Styles for Enhanced Features */
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .file-item {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .file-action-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 4px;
+        }
+
+        .collaboration-list {
+            margin-top: 15px;
+        }
+
+        .collaborator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .collaborator:last-child {
+            border-bottom: none;
+        }
+
+        .collaborator-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-container {
+            background: var(--background-color);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid var(--panel-border);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Page Styles */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Analysis Tools */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-color);
+        }
+
+        .tool-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        /* Toggle Layers */
+        .toggle-layer {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .toggle-layer.active {
+            display: block;
+        }
+
+        /* Responsive Adjustments */
+        @media (min-width: 768px) {
+            .analysis-grid, .tools-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .mobile-nav {
+                display: none;
+            }
+            
+            body {
+                padding-bottom: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification Container -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Authentication Screen -->
+    <div id="authScreen">
+        <div class="auth-container">
+            <h1 class="auth-title"><i class="fas fa-dna"></i> GenomicsAI</h1>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+            </div>
+            <button class="btn btn-primary" onclick="login()">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="#" style="color: var(--primary-color);">Create Account</a> | 
+                <a href="#" style="color: var(--primary-color);">Forgot Password?</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="appScreen" style="display: none;">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <div class="logo">🧬 GenomicsAI</div>
+            <div class="user-menu">
+                <div class="user-avatar">JD</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboardPage" class="page active">
+            <div class="content-area">
+                <!-- Dashboard Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        Dashboard <span class="real-time-badge">LIVE</span>
+                        <button class="toggle-btn" onclick="toggleLayer('dashboardLayer')">
+                            <i class="fas fa-cog"></i> Customize
+                        </button>
+                    </div>
+                    <div class="toggle-layer" id="dashboardLayer">
+                        <div class="form-group">
+                            <label>Dashboard Elements</label>
+                            <div>
+                                <input type="checkbox" id="toggleMetrics" checked onchange="toggleElement('metricsGrid', this.checked)">
+                                <label for="toggleMetrics">Show Metrics</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="toggleVisualization" checked onchange="toggleElement('molecularSection', this.checked)">
+                                <label for="toggleVisualization">Show Visualization</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="toggleAnalysis" checked onchange="toggleElement('analysisSection', this.checked)">
+                                <label for="toggleAnalysis">Show Analysis</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="toggleCharts" checked onchange="toggleElement('chartsSection', this.checked)">
+                                <label for="toggleCharts">Show Charts</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="metricsGrid">
+                        <div class="analysis-grid">
+                            <div class="metric-card">
+                                <div class="metric-value" id="cpuUsage">42%</div>
+                                <div class="metric-label">CPU Usage</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="memoryUsage">68%</div>
+                                <div class="metric-label">Memory</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="activeJobs">5</div>
+                                <div class="metric-label">Active Jobs</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="latencyValue">42ms</div>
+                                <div class="metric-label">Latency</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visualization Panel -->
+                <div class="panel" id="molecularSection">
+                    <div class="panel-title">
+                        3D Molecular Visualization
+                        <button class="toggle-btn" onclick="toggleLayer('visualizationLayer')">
+                            <i class="fas fa-sliders-h"></i> Controls
+                        </button>
+                    </div>
+                    <div class="toggle-layer" id="visualizationLayer">
+                        <div class="form-group">
+                            <label>Visualization Settings</label>
+                            <div>
+                                <input type="range" min="0" max="100" value="75" oninput="updateVisualizationQuality(this.value)">
+                                <label>Quality: <span id="qualityValue">75%</span></label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="toggleLabels" checked>
+                                <label for="toggleLabels">Show Labels</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="toggleAnimation" checked>
+                                <label for="toggleAnimation">Enable Animation</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="molecular-viewer">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                    <div class="molecule-controls">
+                        <button class="control-btn active">Structure</button>
+                        <button class="control-btn">Surface</button>
+                        <button class="control-btn">Cartoon</button>
+                        <button class="control-btn">Spin</button>
+                    </div>
+                </div>
+
+                <!-- Analysis Panel -->
+                <div class="panel" id="analysisSection">
+                    <div class="panel-title">
+                        Analysis Results
+                        <button class="toggle-btn" onclick="toggleLayer('analysisLayer')">
+                            <i class="fas fa-chart-bar"></i> Options
+                        </button>
+                    </div>
+                    <div class="toggle-layer" id="analysisLayer">
+                        <div class="form-group">
+                            <label>Analysis Display Options</label>
+                            <div>
+                                <input type="checkbox" id="toggleConfidence" checked onchange="toggleElement('confidenceScore', this.checked)">
+                                <label for="toggleConfidence">Show Confidence</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="toggleRMSD" checked onchange="toggleElement('rmsdValue', this.checked)">
+                                <label for="toggleRMSD">Show RMSD</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="toggleAffinity" checked onchange="toggleElement('bindingAffinity', this.checked)">
+                                <label for="toggleAffinity">Show Binding Affinity</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="toggleDruglikeness" checked onchange="toggleElement('druglikenessScore', this.checked)">
+                                <label for="toggleDruglikeness">Show Drug-likeness</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="analysis-grid">
+                        <div class="metric-card" id="confidenceScore">
+                            <div class="metric-value">87.5%</div>
+                            <div class="metric-label">Confidence</div>
+                        </div>
+                        <div class="metric-card" id="rmsdValue">
+                            <div class="metric-value">2.3Å</div>
+                            <div class="metric-label">RMSD</div>
+                        </div>
+                        <div class="metric-card" id="bindingAffinity">
+                            <div class="metric-value">-8.4</div>
+                            <div class="metric-label">Binding Affinity</div>
+                        </div>
+                        <div class="metric-card" id="druglikenessScore">
+                            <div class="metric-value">0.73</div>
+                            <div class="metric-label">Drug-likeness</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Visualization Panel -->
+                <div class="panel" id="chartsSection">
+                    <div class="panel-title">
+                        Real-time Data Visualization
+                        <button class="toggle-btn" onclick="toggleLayer('chartsLayer')">
+                            <i class="fas fa-chart-line"></i> Settings
+                        </button>
+                    </div>
+                    <div class="toggle-layer" id="chartsLayer">
+                        <div class="form-group">
+                            <label>Chart Display Options</label>
+                            <div>
+                                <input type="checkbox" id="toggleQC" checked onchange="toggleChart('qcChart', this.checked)">
+                                <label for="toggleQC">Show QC Metrics</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="togglePerformance" checked onchange="toggleChart('performanceChart', this.checked)">
+                                <label for="togglePerformance">Show Performance</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="toggleClient" checked onchange="toggleChart('clientChart', this.checked)">
+                                <label for="toggleClient">Show Client Data</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="autoRefresh" checked>
+                                <label for="autoRefresh">Auto Refresh</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-container">
+                        <div class="tab-buttons">
+                            <button class="tab-btn active" onclick="switchTab('qc-tab')">QC Metrics</button>
+                            <button class="tab-btn" onclick="switchTab('performance-tab')">Performance</button>
+                            <button class="tab-btn" onclick="switchTab('client-tab')">Client Data</button>
+                        </div>
+                        <div class="tab-content">
+                            <div id="qc-tab" class="tab-pane active">
+                                <div class="chart-container">
+                                    <canvas id="qcChart"></canvas>
+                                </div>
+                            </div>
+                            <div id="performance-tab" class="tab-pane">
+                                <div class="chart-container">
+                                    <canvas id="performanceChart"></canvas>
+                                </div>
+                            </div>
+                            <div id="client-tab" class="tab-pane">
+                                <div class="chart-container">
+                                    <canvas id="clientChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Page -->
+        <div id="analysisPage" class="page">
+            <div class="content-area">
+                <!-- Sequence Input Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        Sequence Input
+                        <button class="toggle-btn" onclick="toggleLayer('sequenceLayer')">
+                            <i class="fas fa-code"></i> Options
+                        </button>
+                    </div>
+                    <div class="toggle-layer" id="sequenceLayer">
+                        <div class="form-group">
+                            <label>Sequence Options</label>
+                            <div>
+                                <input type="checkbox" id="autoValidate" checked>
+                                <label for="autoValidate">Auto Validate</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="syntaxHighlight" checked>
+                                <label for="syntaxHighlight">Syntax Highlighting</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="showLineNumbers">
+                                <label for="showLineNumbers">Show Line Numbers</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="sequenceInput" class="form-input" placeholder="Enter protein sequence..." rows="3"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="predictStructure()">
+                        <i class="fas fa-bolt"></i> Predict Structure
+                    </button>
+                </div>
+
+                <!-- Analysis Tools Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        Analysis Tools
+                        <button class="toggle-btn" onclick="toggleLayer('toolsLayer')">
+                            <i class="fas fa-wrench"></i> Configure
+                        </button>
+                    </div>
+                    <div class="toggle-layer" id="toolsLayer">
+                        <div class="form-group">
+                            <label>Tool Preferences</label>
+                            <div>
+                                <input type="checkbox" id="preferGPU" checked>
+                                <label for="preferGPU">Prefer GPU Acceleration</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="saveResults">
+                                <label for="saveResults">Auto-save Results</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="emailNotifications">
+                                <label for="emailNotifications">Email Notifications</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tools-grid">
+                        <div class="tool-card" onclick="runAlphaFold()">
+                            <div class="tool-icon"><i class="fas fa-project-diagram"></i></div>
+                            <div>AlphaFold</div>
+                        </div>
+                        <div class="tool-card" onclick="runPyMol()">
+                            <div class="tool-icon"><i class="fas fa-eye"></i></div>
+                            <div>PyMol</div>
+                        </div>
+                        <div class="tool-card" onclick="runFoldseek()">
+                            <div class="tool-icon"><i class="fas fa-search"></i></div>
+                            <div>Foldseek</div>
+                        </div>
+                        <div class="tool-card" onclick="generateLinkers()">
+                            <div class="tool-icon"><i class="fas fa-link"></i></div>
+                            <div>Generate Linkers</div>
+                        </div>
+                        <div class="tool-card" onclick="runEDA()">
+                            <div class="tool-icon"><i class="fas fa-chart-bar"></i></div>
+                            <div>Exploratory Analysis</div>
+                        </div>
+                        <div class="tool-card" onclick="runLogisticRegression()">
+                            <div class="tool-icon"><i class="fas fa-brain"></i></div>
+                            <div>Logistic Regression</div>
+                        </div>
+                        <div class="tool-card" onclick="runGradientDescent()">
+                            <div class="tool-icon"><i class="fas fa-chart-line"></i></div>
+                            <div>Gradient Descent</div>
+                        </div>
+                        <div class="tool-card" onclick="runMDA()">
+                            <div class="tool-icon"><i class="fas fa-atom"></i></div>
+                            <div>Molecular Dynamics</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drug Discovery Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        Drug Discovery
+                        <button class="toggle-btn" onclick="toggleLayer('drugLayer')">
+                            <i class="fas fa-capsules"></i> Settings
+                        </button>
+                    </div>
+                    <div class="toggle-layer" id="drugLayer">
+                        <div class="form-group">
+                            <label>Drug Discovery Settings</label>
+                            <div>
+                                <input type="checkbox" id="showSimilarity" checked>
+                                <label for="showSimilarity">Show Similarity Scores</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="showToxicity" checked>
+                                <label for="showToxicity">Show Toxicity Predictions</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="showInteractions">
+                                <label for="showInteractions">Show Interaction Maps</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tools-grid">
+                        <div class="tool-card" onclick="searchCSD()">
+                            <div class="tool-icon"><i class="fas fa-database"></i></div>
+                            <div>CSD Search</div>
+                        </div>
+                        <div class="tool-card" onclick="analyzeBioavailability()">
+                            <div class="tool-icon"><i class="fas fa-pills"></i></div>
+                            <div>Bioavailability</div>
+                        </div>
+                        <div class="tool-card" onclick="findActiveSites()">
+                            <div class="tool-icon"><i class="fas fa-bullseye"></i></div>
+                            <div>Active Sites</div>
+                        </div>
+                        <div class="tool-card" onclick="analyzeInteractions()">
+                            <div class="tool-icon"><i class="fas fa-handshake"></i></div>
+                            <div>Protein Interactions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Page -->
+        <div id="dataPage" class="page">
+            <div class="content-area">
+                <!-- Data Management Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        Data Management
+                        <button class="toggle-btn" onclick="toggleLayer('dataLayer')">
+                            <i class="fas fa-cog"></i> Settings
+                        </button>
+                    </div>
+                    <div class="toggle-layer" id="dataLayer">
+                        <div class="form-group">
+                            <label>Data Management Options</label>
+                            <div>
+                                <input type="checkbox" id="autoBackup" checked>
+                                <label for="autoBackup">Auto Backup</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="versioning" checked>
+                                <label for="versioning">File Versioning</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="encryption">
+                                <label for="encryption">Enable Encryption</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="molecule-controls">
+                        <button class="control-btn" onclick="showUploadModal()">
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
+                        <button class="control-btn" onclick="downloadCurrentData()">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button class="control-btn" onclick="showShareModal()">
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+                    </div>
+                    <div class="file-list" id="fileList">
+                        <div class="file-item">
+                            <span>protein_1.fasta</span>
+                            <div class="file-actions">
+                                <button class="file-action-btn" onclick="editFile('protein_1.fasta')">✏️</button>
+                                <button class="file-action-btn" onclick="deleteFile('protein_1.fasta')">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="file-item">
+                            <span>structure_1.pdb</span>
+                            <div class="file-actions">
+                                <button class="file-action-btn" onclick="editFile('structure_1.pdb')">✏️</button>
+                                <button class="file-action-btn" onclick="deleteFile('structure_1.pdb')">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="file-item">
+                            <span>analysis_results.json</span>
+                            <div class="file-actions">
+                                <button class="file-action-btn" onclick="editFile('analysis_results.json')">✏️</button>
+                                <button class="file-action-btn" onclick="deleteFile('analysis_results.json')">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collaboration Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        Team Collaboration
+                        <button class="toggle-btn" onclick="toggleLayer('collabLayer')">
+                            <i class="fas fa-users-cog"></i> Settings
+                        </button>
+                    </div>
+                    <div class="toggle-layer" id="collabLayer">
+                        <div class="form-group">
+                            <label>Collaboration Settings</label>
+                            <div>
+                                <input type="checkbox" id="notifyCollab" checked>
+                                <label for="notifyCollab">Notify on Changes</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="trackChanges" checked>
+                                <label for="trackChanges">Track Changes</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="approvalWorkflow">
+                                <label for="approvalWorkflow">Enable Approval Workflow</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collaboration-list">
+                        <div class="collaborator">
+                            <div class="collaborator-avatar">JD</div>
+                            <div>
+                                <div>John Doe (You)</div>
+                                <div style="font-size: 0.8em; opacity: 0.8;">Owner</div>
+                            </div>
+                        </div>
+                        <div class="collaborator">
+                            <div class="collaborator-avatar">AS</div>
+                            <div>
+                                <div>Alice Smith</div>
+                                <div style="font-size: 0.8em; opacity: 0.8;">Editor</div>
+                            </div>
+                        </div>
+                        <div class="collaborator">
+                            <div class="collaborator-avatar">BJ</div>
+                            <div>
+                                <div>Bob Johnson</div>
+                                <div style="font-size: 0.8em; opacity: 0.8;">Viewer</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="showCollaborationModal()">
+                        <i class="fas fa-user-plus"></i> Invite Collaborators
+                    </button>
+                </div>
+
+                <!-- System Monitoring Panel -->
+                <div class="panel">
+                    <div class="panel-title">
+                        System Monitoring
+                        <button class="toggle-btn" onclick="toggleLayer('monitoringLayer')">
+                            <i class="fas fa-sliders-h"></i> Configure
+                        </button>
+                    </div>
+                    <div class="toggle-layer" id="monitoringLayer">
+                        <div class="form-group">
+                            <label>Monitoring Settings</label>
+                            <div>
+                                <input type="checkbox" id="monitorCPU" checked>
+                                <label for="monitorCPU">Monitor CPU</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="monitorMemory" checked>
+                                <label for="monitorMemory">Monitor Memory</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="monitorTemp" checked>
+                                <label for="monitorTemp">Monitor Temperature</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="monitorLatency" checked>
+                                <label for="monitorLatency">Monitor Latency</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="analysis-grid">
+                        <div class="metric-card">
+                            <div class="metric-value" id="sysCpuUsage">42%</div>
+                            <div class="metric-label">CPU Usage</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="sysMemoryUsage">68%</div>
+                            <div class="metric-label">Memory</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="sysTemperature">36.7°C</div>
+                            <div class="metric-label">Temperature</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="sysLatency">42ms</div>
+                            <div class="metric-label">Latency</div>
+                        </div>
+                    </div>
+                    <div class="molecule-controls">
+                        <button class="control-btn" onclick="runSystemDiagnostic()">Run Diagnostic</button>
+                        <button class="control-btn" onclick="showPerformanceLogs()">View Logs</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div class="mobile-nav">
+            <a href="#" class="nav-item active" onclick="switchPage('dashboardPage')">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" onclick="switchPage('analysisPage')">
+                <i class="fas fa-dna"></i>
+                <span>Analysis</span>
+            </a>
+            <a href="#" class="nav-item" onclick="switchPage('dataPage')">
+                <i class="fas fa-database"></i>
+                <span>Data</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="panel-title">Upload Files</div>
+            <div class="form-group">
+                <label for="fileInput">Select files to upload</label>
+                <input type="file" id="fileInput" class="form-input" multiple>
+            </div>
+            <div class="form-group">
+                <label for="fileDescription">Description (optional)</label>
+                <textarea id="fileDescription" class="form-input" placeholder="Add a description for your files..." rows="3"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="uploadFiles()">Upload</button>
+                <button class="btn" onclick="closeModal('uploadModal')" style="background: var(--error-color);">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="panel-title">Share Data</div>
+            <div class="form-group">
+                <label for="shareEmail">Email Address</label>
+                <input type="email" id="shareEmail" class="form-input" placeholder="Enter email to share with">
+            </div>
+            <div class="form-group">
+                <label for="sharePermissions">Permissions</label>
+                <select id="sharePermissions" class="form-input">
+                    <option>Can view</option>
+                    <option>Can edit</option>
+                    <option>Can comment</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="shareData()">Share</button>
+                <button class="btn" onclick="closeModal('shareModal')" style="background: var(--error-color);">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collaboration Modal -->
+    <div id="collaborationModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="panel-title">Invite Collaborators</div>
+            <div class="form-group">
+                <label for="collabEmail">Email Addresses</label>
+                <input type="text" id="collabEmail" class="form-input" placeholder="Enter emails separated by commas">
+            </div>
+            <div class="form-group">
+                <label for="collabPermissions">Permissions</label>
+                <select id="collabPermissions" class="form-input">
+                    <option>Can view</option>
+                    <option>Can edit</option>
+                    <option>Can comment</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="collabMessage">Message (optional)</label>
+                <textarea id="collabMessage" class="form-input" placeholder="Add a message for your collaborators..." rows="3"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="inviteCollaborators()">Send Invites</button>
+                <button class="btn" onclick="closeModal('collaborationModal')" style="background: var(--error-color);">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let monitoringInterval;
+        let qcChart, performanceChart, clientChart;
+        let simulationData = {
+            cpu: 42,
+            memory: 68,
+            jobs: 5,
+            latency: 42,
+            confidence: 87.5,
+            rmsd: 2.3,
+            affinity: -8.4,
+            druglikeness: 0.73,
+            temperature: 36.7
+        };
+
+        // Initialize the application
+        function init() {
+            // Check if user is already logged in (for demo purposes)
+            const isLoggedIn = localStorage.getItem('genomicsLoggedIn');
+            if (isLoggedIn) {
+                showApp();
+            } else {
+                document.getElementById('authScreen').style.display = 'block';
+            }
+        }
+
+        // Login function
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showNotification('Please enter both email and password', 'error');
+                return;
+            }
+            
+            // Simulate login process
+            showNotification('Logging in...', 'info');
+            
+            setTimeout(() => {
+                localStorage.setItem('genomicsLoggedIn', 'true');
+                showApp();
+                showNotification('Login successful!', 'success');
+            }, 1500);
+        }
+
+        // Show main application
+        function showApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+            initVisualizations();
+            startMonitoring();
+            simulateMolecularViewer();
+        }
+
+        // Switch between pages
+        function switchPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Deactivate all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Activate selected page
+            document.getElementById(pageId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Toggle layer visibility
+        function toggleLayer(layerId) {
+            const layer = document.getElementById(layerId);
+            layer.classList.toggle('active');
+        }
+
+        // Toggle element visibility
+        function toggleElement(elementId, isVisible) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.style.display = isVisible ? 'block' : 'none';
+            }
+        }
+
+        // Toggle chart visibility
+        function toggleChart(chartId, isVisible) {
+            const chartContainer = document.getElementById(chartId).parentElement;
+            chartContainer.style.display = isVisible ? 'block' : 'none';
+        }
+
+        // Update visualization quality
+        function updateVisualizationQuality(value) {
+            document.getElementById('qualityValue').textContent = value + '%';
+            showNotification('Visualization quality set to ' + value + '%', 'info');
+        }
+
+        // Initialize visualizations
+        function initVisualizations() {
+            // Initialize QC Chart
+            const qcCtx = document.getElementById('qcChart').getContext('2d');
+            qcChart = new Chart(qcCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Quality', 'Alignment', 'Coverage', 'Contamination'],
+                    datasets: [{
+                        label: 'QC Metrics',
+                        data: [92, 85, 95, 99],
+                        backgroundColor: [
+                            'rgba(0, 255, 200, 0.7)',
+                            'rgba(102, 126, 234, 0.7)',
+                            'rgba(118, 75, 162, 0.7)',
+                            'rgba(40, 167, 69, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 255, 200, 1)',
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(118, 75, 162, 1)',
+                            'rgba(40, 167, 69, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'white'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Initialize Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+                    datasets: [{
+                        label: 'CPU Usage (%)',
+                        data: [45, 52, 38, 48, 56, 42],
+                        borderColor: 'rgba(0, 255, 200, 1)',
+                        backgroundColor: 'rgba(0, 255, 200, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'white'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Initialize Client Chart
+            const clientCtx = document.getElementById('clientChart').getContext('2d');
+            clientChart = new Chart(clientCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Labs', 'Pharma', 'Academic'],
+                    datasets: [{
+                        label: 'Client Distribution',
+                        data: [35, 25, 20],
+                        backgroundColor: [
+                            'rgba(0, 255, 200, 0.7)',
+                            'rgba(102, 126, 234, 0.7)',
+                            'rgba(118, 75, 162, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 255, 200, 1)',
+                            'rgba(102, 126, 234, 1)',
+                            'rgba(118, 75, 162, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Start monitoring system metrics
+        function startMonitoring() {
+            // Update metrics periodically
+            monitoringInterval = setInterval(updateMetrics, 2000);
+            updateMetrics(); // Initial update
+        }
+
+        // Update metrics with simulated data
+        function updateMetrics() {
+            // Simulate small fluctuations in values
+            simulationData.cpu = Math.max(10, Math.min(90, simulationData.cpu + (Math.random() * 10 - 5)));
+            simulationData.memory = Math.max(20, Math.min(95, simulationData.memory + (Math.random() * 8 - 4)));
+            simulationData.jobs = Math.max(1, Math.min(10, simulationData.jobs + (Math.random() > 0.8 ? 1 : 0)));
+            simulationData.latency = Math.max(20, Math.min(200, simulationData.latency + (Math.random() * 20 - 10)));
+            simulationData.temperature = Math.max(35, Math.min(40, simulationData.temperature + (Math.random() * 0.4 - 0.2)));
+            
+            // Update dashboard metrics
+            document.getElementById('cpuUsage').textContent = Math.round(simulationData.cpu) + '%';
+            document.getElementById('memoryUsage').textContent = Math.round(simulationData.memory) + '%';
+            document.getElementById('activeJobs').textContent = Math.round(simulationData.jobs);
+            document.getElementById('latencyValue').textContent = Math.round(simulationData.latency) + 'ms';
+            
+            // Update data page metrics
+            document.getElementById('sysCpuUsage').textContent = Math.round(simulationData.cpu) + '%';
+            document.getElementById('sysMemoryUsage').textContent = Math.round(simulationData.memory) + '%';
+            document.getElementById('sysLatency').textContent = Math.round(simulationData.latency) + 'ms';
+            document.getElementById('sysTemperature').textContent = simulationData.temperature.toFixed(1) + '°C';
+            
+            // Update analysis metrics with smaller fluctuations
+            const confidenceElement = document.getElementById('confidenceScore');
+            if (confidenceElement && confidenceElement.style.display !== 'none') {
+                confidenceElement.querySelector('.metric-value').textContent = (simulationData.confidence + (Math.random() * 0.4 - 0.2)).toFixed(1) + '%';
+            }
+            
+            const rmsdElement = document.getElementById('rmsdValue');
+            if (rmsdElement && rmsdElement.style.display !== 'none') {
+                rmsdElement.querySelector('.metric-value').textContent = (simulationData.rmsd + (Math.random() * 0.1 - 0.05)).toFixed(1) + 'Å';
+            }
+            
+            const affinityElement = document.getElementById('bindingAffinity');
+            if (affinityElement && affinityElement.style.display !== 'none') {
+                affinityElement.querySelector('.metric-value').textContent = (simulationData.affinity + (Math.random() * 0.1 - 0.05)).toFixed(1);
+            }
+            
+            const druglikenessElement = document.getElementById('druglikenessScore');
+            if (druglikenessElement && druglikenessElement.style.display !== 'none') {
+                druglikenessElement.querySelector('.metric-value').textContent = (simulationData.druglikeness + (Math.random() * 0.02 - 0.01)).toFixed(2);
+            }
+            
+            // Update charts with new data
+            if (performanceChart) {
+                performanceChart.data.datasets[0].data = [
+                    performanceChart.data.datasets[0].data[1],
+                    performanceChart.data.datasets[0].data[2],
+                    performanceChart.data.datasets[0].data[3],
+                    performanceChart.data.datasets[0].data[4],
+                    performanceChart.data.datasets[0].data[5],
+                    Math.round(simulationData.cpu)
+                ];
+                performanceChart.update();
+            }
+        }
+
+        // Simulate molecular viewer
+        function simulateMolecularViewer() {
+            const viewer = document.getElementById('molecular-viewer');
+            viewer.innerHTML = '';
+            
+            // Create a simple canvas-based visualization
+            const canvas = document.createElement('canvas');
+            canvas.width = viewer.offsetWidth;
+            canvas.height = viewer.offsetHeight;
+            viewer.appendChild(canvas);
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Draw a simple representation of a protein structure
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw background
+                ctx.fillStyle = 'rgba(26, 26, 46, 0.8)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw molecular structure (simplified)
+                ctx.strokeStyle = '#00ffc8';
+                ctx.lineWidth = 2;
+                
+                // Draw alpha helices
+                for (let i = 0; i < 5; i++) {
+                    const x = 30 + i * 30;
+                    const y = canvas.height / 2;
+                    const radius = 10 + i * 2;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                
+                // Draw beta sheets
+                for (let i = 0; i < 4; i++) {
+                    const x = canvas.width - 30 - i * 30;
+                    const y = canvas.height / 2;
+                    const size = 15 + i * 2;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x - size/2, y - size/2);
+                    ctx.lineTo(x + size/2, y - size/2);
+                    ctx.lineTo(x + size/2, y + size/2);
+                    ctx.lineTo(x - size/2, y + size/2);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+                
+                // Draw connecting lines
+                ctx.beginPath();
+                ctx.moveTo(80, canvas.height / 2);
+                ctx.lineTo(canvas.width - 100, canvas.height / 2);
+                ctx.stroke();
+            }
+            
+            draw();
+            
+            // Add rotation animation
+            let rotation = 0;
+            setInterval(() => {
+                rotation += 0.01;
+                canvas.style.transform = `rotateY(${rotation}rad)`;
+            }, 50);
+        }
+
+        // Predict structure function
+        function predictStructure() {
+            const sequence = document.getElementById('sequenceInput').value;
+            if (!sequence) {
+                showNotification('Please enter a protein sequence first', 'error');
+                return;
+            }
+            
+            showNotification('Predicting protein structure...', 'info');
+            
+            // Simulate prediction process
+            const progressInterval = setInterval(() => {
+                // Simulate progress updates
+                simulationData.confidence = Math.min(95, simulationData.confidence + 5);
+                const confidenceElement = document.getElementById('confidenceScore');
+                if (confidenceElement && confidenceElement.style.display !== 'none') {
+                    confidenceElement.querySelector('.metric-value').textContent = simulationData.confidence.toFixed(1) + '%';
+                }
+            }, 500);
+            
+            setTimeout(() => {
+                clearInterval(progressInterval);
+                showNotification('Structure prediction completed!', 'success');
+                
+                // Update visualization
+                simulateMolecularViewer();
+            }, 3000);
+        }
+
+        // Analysis functions
+        function runAlphaFold() {
+            showNotification('Running AlphaFold prediction...', 'info');
+            setTimeout(() => showNotification('AlphaFold prediction completed!', 'success'), 2500);
+        }
+
+        function runPyMol() {
+            showNotification('Launching PyMol visualization...', 'info');
+        }
+
+        function runFoldseek() {
+            showNotification('Running Foldseek analysis...', 'info');
+            setTimeout(() => showNotification('Foldseek analysis completed!', 'success'), 2000);
+        }
+
+        function generateLinkers() {
+            showNotification('Generating protein linkers...', 'info');
+            setTimeout(() => showNotification('Linker generation completed!', 'success'), 1800);
+        }
+
+        function runEDA() {
+            showNotification('Running exploratory data analysis...', 'info');
+            setTimeout(() => showNotification('EDA completed!', 'success'), 2200);
+        }
+
+        function runLogisticRegression() {
+            showNotification('Running logistic regression...', 'info');
+            setTimeout(() => showNotification('Logistic regression completed!', 'success'), 2000);
+        }
+
+        function runGradientDescent() {
+            showNotification('Running gradient descent optimization...', 'info');
+            setTimeout(() => showNotification('Gradient descent completed!', 'success'), 2500);
+        }
+
+        function runMDA() {
+            showNotification('Running molecular dynamics analysis...', 'info');
+            setTimeout(() => showNotification('Molecular dynamics completed!', 'success'), 3000);
+        }
+
+        function searchCSD() {
+            showNotification('Searching Cambridge Structural Database...', 'info');
+            setTimeout(() => showNotification('CSD search completed! 15 matches found.', 'success'), 2000);
+        }
+
+        function analyzeBioavailability() {
+            showNotification('Analyzing bioavailability...', 'info');
+            setTimeout(() => showNotification('Bioavailability analysis completed!', 'success'), 1800);
+        }
+
+        function findActiveSites() {
+            showNotification('Identifying active sites...', 'info');
+            setTimeout(() => showNotification('Active site identification completed! 3 sites found.', 'success'), 2200);
+        }
+
+        function analyzeInteractions() {
+            showNotification('Analyzing protein interactions...', 'info');
+            setTimeout(() => showNotification('Interaction analysis completed!', 'success'), 2500);
+        }
+
+        function runSystemDiagnostic() {
+            showNotification('Running system diagnostic...', 'info');
+            setTimeout(() => showNotification('System diagnostic completed. No critical issues found.', 'success'), 2000);
+        }
+
+        function showPerformanceLogs() {
+            showNotification('Performance logs would open here', 'info');
+        }
+
+        // Switch tab function
+        function switchTab(tabId) {
+            // Hide all tab panes
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            
+            // Deactivate all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Activate selected tab
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Show notification function
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Data management functions
+        function showUploadModal() {
+            document.getElementById('uploadModal').style.display = 'flex';
+        }
+
+        function uploadFiles() {
+            const fileInput = document.getElementById('fileInput');
+            const description = document.getElementById('fileDescription').value;
+            
+            if (fileInput.files.length === 0) {
+                showNotification('Please select at least one file to upload', 'error');
+                return;
+            }
+            
+            // Simulate file upload
+            showNotification('Uploading files...', 'info');
+            
+            setTimeout(() => {
+                // Add new files to the file list
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    const file = fileInput.files[i];
+                    addFileToFileList(file.name);
+                }
+                
+                closeModal('uploadModal');
+                showNotification('Files uploaded successfully!', 'success');
+                
+                // Reset form
+                fileInput.value = '';
+                document.getElementById('fileDescription').value = '';
+            }, 1500);
+        }
+
+        function addFileToFileList(fileName) {
+            const fileList = document.getElementById('fileList');
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <span>${fileName}</span>
+                <div class="file-actions">
+                    <button class="file-action-btn" onclick="editFile('${fileName}')">✏️</button>
+                    <button class="file-action-btn" onclick="deleteFile('${fileName}')">🗑️</button>
+                </div>
+            `;
+            fileList.appendChild(fileItem);
+        }
+
+        function downloadCurrentData() {
+            showNotification('Preparing download...', 'info');
+            
+            setTimeout(() => {
+                // Simulate download
+                const link = document.createElement('a');
+                link.download = 'genomics_data.zip';
+                link.href = 'data:application/zip;base64,UEsDBBQAAAAIA...'; // truncated for brevity
+                link.click();
+                
+                showNotification('Download started!', 'success');
+            }, 1000);
+        }
+
+        function showShareModal() {
+            document.getElementById('shareModal').style.display = 'flex';
+        }
+
+        function shareData() {
+            const email = document.getElementById('shareEmail').value;
+            const permissions = document.getElementById('sharePermissions').value;
+            
+            if (!email) {
+                showNotification('Please enter an email address', 'error');
+                return;
+            }
+            
+            closeModal('shareModal');
+            showNotification(`Shared with ${email} (${permissions})`, 'success');
+        }
+
+        function showCollaborationModal() {
+            document.getElementById('collaborationModal').style.display = 'flex';
+        }
+
+        function inviteCollaborators() {
+            const emails = document.getElementById('collabEmail').value;
+            const permissions = document.getElementById('collabPermissions').value;
+            const message = document.getElementById('collabMessage').value;
+            
+            if (!emails) {
+                showNotification('Please enter at least one email address', 'error');
+                return;
+            }
+            
+            closeModal('collaborationModal');
+            showNotification('Invitations sent successfully!', 'success');
+        }
+
+        function editFile(fileName) {
+            showNotification(`Edit functionality for ${fileName} would open here`, 'info');
+        }
+
+        function deleteFile(fileName) {
+            if (confirm(`Are you sure you want to delete ${fileName}?`)) {
+                showNotification(`Deleted ${fileName}`, 'success');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Initialize the application when the page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
